@@ -1,4 +1,4 @@
-use std::{io::Write, net::TcpListener};
+use std::{io::{Read, Write}, net::TcpListener};
 
 fn main() {
     println!("Logs from your program will appear here!");
@@ -8,8 +8,15 @@ fn main() {
     for stream in listener.incoming() {
         match stream {
             Ok(mut stream) => {
-                let _ = stream.write(b"+PONG\r\n"); 
-            }, 
+                let mut buffer = [0; 512];
+                loop {
+                    let read_count = stream.read(&mut buffer).unwrap();
+                    if read_count == 0 {
+                        break;
+                    }
+                    let _ = stream.write(b"+PONG\r\n");
+                }
+            }
             Err(e) => {
                 println!("error: {}", e);
             }
